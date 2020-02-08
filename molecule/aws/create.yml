@@ -34,6 +34,7 @@
   tasks:
     - name: Create security group
       ec2_group:
+        region: "{{ molecule_yml.driver.region }}"
         name: "{{ security_group_name }}"
         description: "{{ security_group_name }}"
         rules: "{{ security_group_rules }}"
@@ -46,12 +47,14 @@
 
     - name: Delete remote keypair
       ec2_key:
+        region: "{{ molecule_yml.driver.region }}"
         name: "{{ keypair_name }}"
         state: absent
       when: not keypair_local.stat.exists
 
     - name: Create keypair
       ec2_key:
+        region: "{{ molecule_yml.driver.region }}"
         name: "{{ keypair_name }}"
       register: keypair
 
@@ -64,7 +67,7 @@
 
     - name: Get the image ami
       ec2_ami_info:
-        region: "{{ item.region }}"
+        region: "{{ molecule_yml.driver.region }}"
         owners: "{{ item.image_owner }}"
         filters:
           name: "{{ item.image_name }}"
@@ -75,7 +78,7 @@
     - name: Create molecule instance(s)
       ec2:
         key_name: "{{ keypair_name }}"
-        region: "{{ item.region }}"
+        region: "{{ molecule_yml.driver.region }}"
         image: "{{ item.image
           if item.image is defined
           else (ec2_ami_facts.results[index].images | sort(attribute='creation_date', reverse=True))[0].image_id }}"
